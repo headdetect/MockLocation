@@ -4,10 +4,19 @@ import android.app.Activity;
 
 import android.app.ActionBar;
 import android.app.FragmentManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class MainActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -54,9 +63,6 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
             case 2:
                 mTitle = getString(R.string.title_section2);
                 break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
         }
     }
 
@@ -87,10 +93,51 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_set_location) {
+            if(LocationMapFragment.currentMarker != null) {
+                MarkerOptions marker = LocationMapFragment.currentMarker;
+
+                try {
+                    setMockLocation(marker.getPosition());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(this, "Location Set to " + marker.getTitle(), Toast.LENGTH_SHORT).show();
+
+            } else {
+                Toast.makeText(this, "You must mark location on map", Toast.LENGTH_SHORT).show();
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private LocationClient client;
+    public void setMockLocation(final LatLng location) throws InterruptedException {
+        client = new LocationClient(this, new GooglePlayServicesClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(Bundle bundle) {
+                client.setMockMode(true);
+
+                Location newLocation = new Location("flp");
+                newLocation.setLatitude(location.latitude);
+                newLocation.setLongitude(location.longitude);
+                newLocation.setAccuracy(3f);
+
+                client.setMockLocation(newLocation);
+            }
+
+            @Override
+            public void onDisconnected() {
+
+            }
+        }, new GoogleApiClient.OnConnectionFailedListener() {
+            @Override
+            public void onConnectionFailed(ConnectionResult connectionResult) {
+                Toast.makeText(MainActivity.this, "Make sure that Mock Location is enabled in developer settings", Toast.LENGTH_SHORT).show();
+            }
+        });
+        client.connect();
     }
 
 }

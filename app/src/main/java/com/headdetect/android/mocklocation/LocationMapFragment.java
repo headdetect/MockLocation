@@ -25,6 +25,8 @@ public class LocationMapFragment extends Fragment implements GoogleMap.OnMyLocat
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
+    public static MarkerOptions currentMarker = null;
+
     private GoogleMap mMap;
 
     public LocationMapFragment() {
@@ -77,6 +79,8 @@ public class LocationMapFragment extends Fragment implements GoogleMap.OnMyLocat
 
     @Override
     public boolean onMyLocationButtonClick() {
+
+
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(FragmentActivity.LOCATION_SERVICE);
 
         Criteria criteria = new Criteria();
@@ -89,19 +93,23 @@ public class LocationMapFragment extends Fragment implements GoogleMap.OnMyLocat
         }
 
         locationManager.requestLocationUpdates(provider, 20000, 0, this);
+
         return true;
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        if(mMap.getCameraPosition().zoom > 10) return;
 
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
         LatLng latlng = new LatLng(lat, lng);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(1));
 
+
+        onMapClick(latlng);
     }
 
     @Override
@@ -121,6 +129,9 @@ public class LocationMapFragment extends Fragment implements GoogleMap.OnMyLocat
         mMap.clear();
         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.addMarker(markerOption);
+
+        currentMarker = markerOption;
+
         new AddressLookupTask(this.getActivity(), mMap, markerOption).execute(latLng);
 
     }

@@ -7,7 +7,6 @@
     <string name="title_activity_my">Maps</string>
     <string name="title_section1">Map</string>
     <string name="title_section2">Favorites</string>
-    <string name="title_section3">Help/Contact</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Set Location</string>
